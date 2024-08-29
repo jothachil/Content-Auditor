@@ -1,0 +1,43 @@
+{
+  "name": "figma-plugins-tailwind-starter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "code.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --mode production",
+    "dev": "webpack --watch --mode development"
+  },
+  "author": "sonnylazuardi",
+  "license": "MIT",
+  "devDependencies": {
+    "@figma/plugin-typings": "1.99.0",
+    "@types/node": "^22.5.1",
+    "css-loader": "^7.1.2",
+    "html-webpack-inline-source-plugin": "0.0.10",
+    "html-webpack-plugin": "^5.6.0",
+    "postcss": "^8.4.41",
+    "postcss-loader": "^8.1.1",
+    "postcss-nested": "^6.2.0",
+    "style-loader": "^4.0.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.5.4",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.94.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@types/react": "^18.3.4",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.20",
+    "figma-jsonrpc": "^0.4.1",
+    "react": "^18.3.1",
+    "react-dev-utils": "^12.0.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^3.4.10"
+  },
+  "volta": {
+    "node": "16.19.0",
+    "pnpm": "7.28.0"
+  }
+}
