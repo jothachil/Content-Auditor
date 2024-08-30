@@ -2,7 +2,6 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import "./ui.css";
 import { pluginApi } from "./api";
-import Dropdown from "./components/Dropdown";
 import {
   Disclosure,
   Tip,
