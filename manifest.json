@@ -1,7 +1,9 @@
 {
   "name": "Rectangler",
-  "id": "",
+  "id": "1411202798800289088",
   "api": "1.0.0",
+  "networkAccess": { "allowedDomains": ["none"] },
+  "documentAccess": "dynamic-page",
   "main": "dist/code.js",
   "ui": "dist/ui.html",
   "editorType": ["figma", "figjam"]
