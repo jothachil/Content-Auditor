@@ -20,23 +20,23 @@ export const pluginApi = createPluginAPI({
 
     figma.currentPage.selection = nodes;
     figma.viewport.scrollAndZoomIntoView(nodes);
-  }
-})
+  },
+});
 
 let eventCallback = {
-  selectionChanged: (selection) => { },
-  pageChanged: (page) => { }
-}
+  selectionChanged: (selection) => {},
+  pageChanged: (page) => {},
+};
 
 export const setEventCallback = (name: string, callback: Function) => {
   eventCallback[name] = callback;
-}
+};
 
 export const uiApi = createUIAPI({
   selectionChanged(selection) {
-    eventCallback.selectionChanged(selection.map((item) => item.id))
+    eventCallback.selectionChanged(selection.map((item) => item.id));
   },
   pageChanged(page) {
-    eventCallback.pageChanged(page)
-  }
+    eventCallback.pageChanged(page);
+  },
 });
