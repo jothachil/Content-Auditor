@@ -2,80 +2,88 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import "./ui.css";
 import { pluginApi } from "./api";
-import {
-  Disclosure,
-  Tip,
-  Title,
-  Input,
-  Select,
-  Button,
-} from "react-figma-plugin-ds";
+import { Input, Button, Label } from "react-figma-plugin-ds";
 import "react-figma-plugin-ds/figma-plugin-ds.css";
 
-declare function require(path: string): any;
-
 function App() {
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const options = [
-    { value: "Option 1", label: "Option 1" },
-    { value: "Option 2", label: "Option 2" },
-    { value: "Option 3", label: "Option 3" },
-  ]; // Updated options format
+  const [count, setCount] = React.useState<string>("1");
+  const [rotation, setRotation] = React.useState<string>("0");
+  const [color, setColor] = React.useState<string>("#FF8A65");
+  const [sizeIncrement, setSizeIncrement] = React.useState<string>("0");
 
   const onCreate = () => {
-    const count = Number(inputRef.current?.value || 0);
-    pluginApi.createRectangle(count);
-    pluginApi.notify(`Added ${count} rectangles`);
-  };
-
-  const onCancel = () => {
-    pluginApi.exit();
-  };
-
-  const onSelect = (option: { value: string; label: string }) => {
-    console.log(`Selected: ${option.label}`);
+    const rectangleCount = Number(count) || 0;
+    const rotationIncrement = Number(rotation) || 0;
+    const sizeInc = Number(sizeIncrement) || 0;
+    pluginApi.createRectangle(
+      rectangleCount,
+      rotationIncrement,
+      color,
+      sizeInc
+    );
+    pluginApi.notify("Created Rectangles");
   };
 
   return (
-    <main className="bg-white h-[100vh] relative ">
-      <div className="pt-2 flex items-center gap-x-2 p-2">
-        <div className="">
-          <Select
-            className="asd"
-            defaultValue=""
-            onChange={function _() {}}
-            onExpand={function _() {}}
-            options={[
-              {
-                label: "Item 1",
-                title: "Item 1 description",
-                value: 1,
-              },
-              {
-                label: "Item 2",
-                title: "Item 2 description",
-                value: 2,
-              },
-            ]}
-            placeholder="Placeholder text..."
-          />
+    <main className="bg-white h-[100vh] relative">
+      <div className="flex flex-col">
+        <div className="flex gap-2 items-start border-b border-gray-200 p-2">
+          <Label className="" size="small" weight="medium">
+            Number of Rectangles
+          </Label>
+          <div className="w-[300px]">
+            <Input
+              defaultValue={count}
+              onChange={(value) => setCount(value)}
+              placeholder="Enter number of rectangles"
+              type="number"
+            />
+          </div>
         </div>
-      </div>
-      <hr className="border-t  border-neutral-200 " />
-      <div className="pt-2 flex items-center gap-x-2 p-2">
-        <div className="flex-1">
-          <Input
-            className=""
-            defaultValue=""
-            onChange={function _() {}}
-            placeholder="Enter Name Placeholder"
-          />
+        <div className="flex gap-2 items-start border-b border-gray-200 p-2">
+          <Label className="" size="small" weight="medium">
+            Rotation Increment
+          </Label>
+          <div className="w-[300px]">
+            <Input
+              defaultValue={rotation}
+              onChange={(value) => setRotation(value)}
+              placeholder="Enter rotation increment"
+              type="number"
+            />
+          </div>
         </div>
-      </div>
-      <div className=" absolute bottom-0 w-full ">
-        <hr className="border-t border-neutral-200 " />
-        <div className="p-2">
-          <Button className="w-full flex justify-center">Hello figma</Button>
+        <div className="flex gap-2 items-start border-b border-gray-200 p-2">
+          <Label className="" size="small" weight="medium">
+            Color
+          </Label>
+          <div className="w-[300px]">
+            <input
+              type="color"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+              className="w-8 h-8 border-none bg-transparent outline-none border-white rounded overflow-hidden"
+            />
+          </div>
+        </div>
+        <div className="flex gap-2 items-start border-b border-gray-200 p-2">
+          <Label className="" size="small" weight="medium">
+            Size Increment
+          </Label>
+          <div className="w-[300px]">
+            <Input
+              defaultValue={sizeIncrement}
+              onChange={(value) => setSizeIncrement(value)}
+              placeholder="Enter size increment"
+              type="number"
+            />
+          </div>
+        </div>
+
+        <div className="absolute bottom-0 left-0 w-full p-2 border-t border-gray-200">
+          <Button className="w-full flex justify-center" onClick={onCreate}>
+            Create Rectangles
+          </Button>
         </div>
       </div>
     </main>

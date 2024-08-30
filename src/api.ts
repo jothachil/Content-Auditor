@@ -7,13 +7,20 @@ export const pluginApi = createPluginAPI({
   notify(message: string) {
     figma.notify(message);
   },
-  createRectangle(count: number) {
+  createRectangle(
+    count: number,
+    rotationIncrement: number,
+    color: string,
+    sizeIncrement: number
+  ) {
     const nodes = [];
 
     for (let i = 0; i < count; i++) {
       const rect = figma.createRectangle();
       rect.x = i * 150;
-      rect.fills = [{ type: "SOLID", color: { r: 1, g: 0.5, b: 0 } }];
+      rect.fills = [{ type: "SOLID", color: figma.util.rgb(color) }];
+      rect.rotation = i * rotationIncrement;
+      rect.resize(100 + i * sizeIncrement, 100 + i * sizeIncrement);
       figma.currentPage.appendChild(rect);
       nodes.push(rect);
     }
