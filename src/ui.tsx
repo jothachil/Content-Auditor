@@ -2,9 +2,17 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import "./ui.css";
 import { pluginApi } from "./api";
-import Button from "./components/Button";
 import Dropdown from "./components/Dropdown";
-import InputField from "./components/InputField";
+import {
+  Disclosure,
+  Tip,
+  Title,
+  Input,
+  Select,
+  Button,
+} from "react-figma-plugin-ds";
+import "react-figma-plugin-ds/figma-plugin-ds.css";
+
 declare function require(path: string): any;
 
 function App() {
@@ -32,25 +40,43 @@ function App() {
   return (
     <main className="bg-white h-[100vh] relative ">
       <div className="pt-2 flex items-center gap-x-2 p-2">
-        <div className="flex-1">
-          <Dropdown
-            options={options}
-            onSelect={(value) =>
-              onSelect(options.find((option) => option.value === value)!)
-            }
+        <div className="">
+          <Select
+            className="asd"
+            defaultValue=""
+            onChange={function _() {}}
+            onExpand={function _() {}}
+            options={[
+              {
+                label: "Item 1",
+                title: "Item 1 description",
+                value: 1,
+              },
+              {
+                label: "Item 2",
+                title: "Item 2 description",
+                value: 2,
+              },
+            ]}
+            placeholder="Placeholder text..."
           />
         </div>
       </div>
       <hr className="border-t  border-neutral-200 " />
       <div className="pt-2 flex items-center gap-x-2 p-2">
         <div className="flex-1">
-          <InputField />
+          <Input
+            className=""
+            defaultValue=""
+            onChange={function _() {}}
+            placeholder="Enter Name Placeholder"
+          />
         </div>
       </div>
       <div className=" absolute bottom-0 w-full ">
         <hr className="border-t border-neutral-200 " />
         <div className="p-2">
-          <Button label="Create" onClick={onCreate} />
+          <Button className="w-full flex justify-center">Hello figma</Button>
         </div>
       </div>
     </main>
