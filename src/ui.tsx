@@ -1,5 +1,5 @@
 import * as React from "react";
-import * as ReactDOM from "react-dom";
+import * as ReactDOM from "react-dom/client";
 import "./ui.css";
 import { pluginApi } from "./api";
 import { Input, Button, Label } from "react-figma-plugin-ds";
@@ -90,4 +90,9 @@ function App() {
   );
 }
 
-ReactDOM.render(<App />, document.getElementById("react-page"));
+// Replace the old render method with the new createRoot API
+const container = document.getElementById("react-page");
+if (container) {
+  const root = ReactDOM.createRoot(container);
+  root.render(<App />);
+}
