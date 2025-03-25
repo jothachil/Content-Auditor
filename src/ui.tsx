@@ -9,14 +9,20 @@ import {
   TbRefresh,
   TbHeartFilled,
   TbTypography,
+  TbEye,
+  TbEyeOff,
 } from "react-icons/tb";
 
 interface TextLayer {
   id: string;
   name: string;
   characters: string;
-  fontName: any;
+  fontName: {
+    family: string;
+    style: string;
+  };
   fontSize: number;
+  visible: boolean;
 }
 
 function App() {
@@ -98,24 +104,31 @@ function App() {
             : "No text layers found in selection. Select frames containing text layers."}
         </div>
       ) : (
-        <div className="p-2 relative bg-slate-200 grid-image h-[500px] overflow-y-scroll">
+        <div className="p-2 relative bg-slate-200 grid-image h-[650px] overflow-y-scroll">
           <div className="absolute top-0 translate-y-2 left-16 w-[230px] h-[10px] blur-xl bg-scarlet-500 z-20"></div>
           <div className="absolute top-0  left-16 w-[200px] h-[1.5px]  bg-gradient-to-r from-slate-100/0 via-scarlet-600 to-slate-100/0 z-20"></div>
           <div className="flex flex-col gap-2 relative z-40  ">
             {textLayers.map((layer) => (
               <div
                 key={layer.id}
-                className="shadow-button-base bg-white hover:bg-slate-50 transition-all  flex items-start justify-between text-slate-900 py-2 px-2.5 rounded cursor-pointer text-xs "
+                className="shadow-button-base bg-white hover:bg-slate-50 transition-all flex items-start justify-between text-slate-900 py-2 px-2.5 rounded cursor-pointer text-xs"
               >
-                <div className="" title={layer.characters}>
-                  {layer.characters}
+                <div className="flex items-start gap-2">
+                  <div className="flex-1 py-1">
+                    {layer.visible ? (
+                      <TbEye className="text-slate-400 w-4 h-4" />
+                    ) : (
+                      <TbEyeOff className="text-slate-400 w-4 h-4" />
+                    )}
+                  </div>
+                  <div title={layer.characters}>{layer.characters}</div>
                 </div>
 
                 <div
                   className="hover:bg-slate-200 px-1 rounded-md"
                   onClick={() => selectAndZoomToLayer(layer.id)}
                 >
-                  <TbArrowRight className="text-scarlet-600  w-4 h-4 my-1" />
+                  <TbArrowRight className="text-scarlet-600 w-4 h-4 my-1" />
                 </div>
               </div>
             ))}

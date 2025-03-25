@@ -32,24 +32,26 @@ export const pluginApi = createPluginAPI({
     const selection = figma.currentPage.selection;
     const textLayers = [];
 
-    // Process each selected node
     for (const node of selection) {
-      // If the node is a frame or a group, find text layers inside it
       if (
         node.type === "FRAME" ||
         node.type === "GROUP" ||
         node.type === "SECTION"
       ) {
         findTextLayersInNode(node, textLayers);
-      }
-      // If the node itself is a text layer, add it directly
-      else if (node.type === "TEXT") {
+      } else if (node.type === "TEXT") {
         textLayers.push({
           id: node.id,
           name: node.name,
           characters: node.characters,
-          fontName: node.fontName,
+          fontName: isFontName(node.fontName)
+            ? {
+                family: node.fontName.family,
+                style: node.fontName.style,
+              }
+            : null,
           fontSize: node.fontSize,
+          visible: isNodeVisible(node),
         });
       }
     }
@@ -79,7 +81,16 @@ export const pluginApi = createPluginAPI({
   },
 });
 
-// Helper function to recursively find text layers in a node
+// Helper function to check if a node and all its parents are visible
+function isNodeVisible(node: BaseNode): boolean {
+  let current: BaseNode | null = node;
+  while (current && "visible" in current) {
+    if (!current.visible) return false;
+    current = current.parent;
+  }
+  return true;
+}
+
 function findTextLayersInNode(node, textLayers) {
   if ("children" in node) {
     for (const child of node.children) {
@@ -88,14 +99,25 @@ function findTextLayersInNode(node, textLayers) {
           id: child.id,
           name: child.name,
           characters: child.characters,
-          fontName: child.fontName,
+          fontName: isFontName(child.fontName)
+            ? {
+                family: child.fontName.family,
+                style: child.fontName.style,
+              }
+            : null,
           fontSize: child.fontSize,
+          visible: isNodeVisible(child),
         });
       } else if ("children" in child) {
         findTextLayersInNode(child, textLayers);
       }
     }
   }
+}
+
+// Add this helper function at the top of the file
+function isFontName(font: any): font is FontName {
+  return typeof font === "object" && "family" in font && "style" in font;
 }
 
 let eventCallback = {
