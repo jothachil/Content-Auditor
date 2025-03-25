@@ -11,7 +11,9 @@ import {
   TbTypography,
   TbEye,
   TbEyeOff,
+  TbAlertSquareRounded,
 } from "react-icons/tb";
+import { validateText, guidelines } from "./guidelines";
 
 interface TextLayer {
   id: string;
@@ -23,17 +25,21 @@ interface TextLayer {
   };
   fontSize: number;
   visible: boolean;
+  guidelineResults?: Record<string, boolean>;
 }
 
 function App() {
   const [textLayers, setTextLayers] = React.useState<TextLayer[]>([]);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [hasSelection, setHasSelection] = React.useState<boolean>(true);
 
   // Function to fetch text layers from the current selection
   const fetchTextLayers = React.useCallback(async () => {
     setIsLoading(true);
     try {
       const layers = await pluginApi.getTextLayersInSelection();
+      // Check if there's any selection when refresh is clicked
+      setHasSelection(layers.length > 0);
       setTextLayers(layers);
     } catch (error) {
       console.error("Error fetching text layers:", error);
@@ -43,14 +49,8 @@ function App() {
     }
   }, []);
 
-  // Set up selection change handler
+  // Initial fetch on mount
   React.useEffect(() => {
-    // Remove the automatic refresh on selection change
-    setEventCallback("selectionChanged", () => {
-      // No longer calling fetchTextLayers here
-    });
-
-    // Initial fetch
     fetchTextLayers();
   }, [fetchTextLayers]);
 
@@ -76,7 +76,7 @@ function App() {
   };
 
   return (
-    <main className="bg-white h-[100vh] flex flex-col ">
+    <main className="bg-white h-[100vh] flex flex-col">
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-300 bg-white">
         <div className="flex items-center gap-1 text-slate-700 text-xss">
           <div className="">
@@ -97,52 +97,111 @@ function App() {
           </a>
         </div>
       </div>
-      {textLayers.length === 0 ? (
-        <div className=" bg-slate-200 text-xss flex-1 flex items-center justify-center  ">
+      {!hasSelection ? (
+        <div className="bg-slate-200 text-xss flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center">
-            <TbTypography className="text-gray-400  w-20 h-20 my-1" />
-            <div className="text-center  text-gray-500 w-[300px]">
+            <TbTypography className="text-gray-400 w-20 h-20 my-1" />
+            <div className="text-center text-gray-500 w-[300px]">
+              No frame selected. Select a frame and click refresh to start
+              auditing text layers.
+            </div>
+          </div>
+        </div>
+      ) : textLayers.length === 0 ? (
+        <div className="bg-slate-200 text-xss flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center">
+            <TbTypography className="text-gray-400 w-20 h-20 my-1" />
+            <div className="text-center text-gray-500 w-[300px]">
               {isLoading
                 ? "Loading..."
-                : "No text layers found in selection. Select frames containing text layers."}
+                : "No text layers found in selection. Select frames containing text layers and click refresh."}
             </div>
           </div>
         </div>
       ) : (
-        <div className="p-2 relative bg-slate-200 grid-image h-[650px] overflow-y-scroll">
+        <div className="p-2 relative bg-slate-200 grid-image overflow-y-scroll">
           <div className="absolute top-0 translate-y-2 left-16 w-[230px] h-[10px] blur-xl bg-scarlet-500 z-20"></div>
           <div className="absolute top-0  left-16 w-[200px] h-[1.5px]  bg-gradient-to-r from-slate-100/0 via-scarlet-600 to-slate-100/0 z-20"></div>
-          <div className="flex flex-col gap-2 relative z-40  ">
+          <div className="flex flex-col gap-2 relative z-40">
             {textLayers.map((layer) => (
               <div
                 key={layer.id}
-                className="shadow-button-base bg-white hover:bg-slate-50 transition-all flex items-start justify-between text-slate-900 py-2 px-2.5 rounded cursor-pointer text-xs"
+                className="shadow-button-base bg-white transition-all flex flex-col text-slate-900  rounded cursor-pointer text-xs"
               >
-                <div className="flex items-start gap-2">
-                  <div className="flex-1 py-1">
-                    {layer.visible ? (
-                      <TbEye className="text-slate-400 w-4 h-4" />
-                    ) : (
-                      <TbEyeOff className="text-slate-400 w-4 h-4" />
-                    )}
+                {/* Layer Header */}
+                <div className="flex items-start justify-between border-b py-2 px-2.5">
+                  <div className="flex items-start gap-2">
+                    <div className="flex-1 py-1">
+                      {layer.visible ? (
+                        <TbEye className="text-slate-400 w-4 h-4" />
+                      ) : (
+                        <TbEyeOff className="text-slate-400 w-4 h-4" />
+                      )}
+                    </div>
+                    <div className="flex flex-col">
+                      <span title={layer.characters}>{layer.characters}</span>
+                      <span className="text-xss text-slate-500">
+                        {layer.fontName?.family} • {layer.fontSize}px
+                      </span>
+                    </div>
                   </div>
-                  <div title={layer.characters}>{layer.characters}</div>
+                  <div
+                    className="hover:bg-slate-200 px-1 rounded-md"
+                    onClick={() => selectAndZoomToLayer(layer.id)}
+                  >
+                    <TbArrowRight className="text-scarlet-600 w-4 h-4 my-1" />
+                  </div>
                 </div>
 
-                <div
-                  className="hover:bg-slate-200 px-1 rounded-md"
-                  onClick={() => selectAndZoomToLayer(layer.id)}
-                >
-                  <TbArrowRight className="text-scarlet-600 w-4 h-4 my-1" />
+                {/* Guidelines Status */}
+                <div className=" flex flex-col gap-[1px]  border-b bg-neutral-200">
+                  {guidelines.map((guideline) => {
+                    const passes =
+                      layer.guidelineResults?.[guideline.id] ?? false;
+                    return (
+                      <div
+                        key={guideline.id}
+                        className={`
+                        flex items-center gap-1  px-1.5
+                        ${
+                          passes
+                            ? "bg-green-50 text-green-700  "
+                            : "bg-red-50 text-red-700  "
+                        }
+                      `}
+                        title={`${guideline.description}${
+                          !passes ? "\nFailed validation" : ""
+                        }`}
+                      >
+                        <span className="text-[10px]">
+                          {passes ? "✓" : "✕"} {guideline.name}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Summary Status */}
+                <div className=" text-xss text-slate-500 py-2 px-2.5">
+                  {Object.values(layer.guidelineResults || {}).every(
+                    (result) => result
+                  ) ? (
+                    "✨ All guidelines passed"
+                  ) : (
+                    <div className=" flex items-center gap-2">
+                      <TbAlertSquareRounded className="text-scarlet-600  w-4 h-4 my-1" />
+                      <div>Needs attenstion</div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         </div>
       )}
-      <div className="bg-white   flex justify-between items-center  p-2 border-t border-slate-300 ">
+      <div className="bg-white flex justify-between items-center p-2 border-t border-slate-300">
         <button
-          className=" bg-scarlet-600 text-white  text-xss py-2.5 rounded hover:bg-scarlet-700 w-full flex items-center justify-center gap-1 transition-all"
+          className="bg-scarlet-600 text-white text-xss py-2.5 rounded hover:bg-scarlet-700 w-full flex items-center justify-center gap-1 transition-all"
           onClick={fetchTextLayers}
         >
           <TbRefresh className="w-4 h-4" />

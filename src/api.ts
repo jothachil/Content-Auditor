@@ -1,4 +1,5 @@
 import { createPluginAPI, createUIAPI } from "figma-jsonrpc";
+import { validateText } from "./guidelines";
 
 export const pluginApi = createPluginAPI({
   exit() {
@@ -40,19 +41,7 @@ export const pluginApi = createPluginAPI({
       ) {
         findTextLayersInNode(node, textLayers);
       } else if (node.type === "TEXT") {
-        textLayers.push({
-          id: node.id,
-          name: node.name,
-          characters: node.characters,
-          fontName: isFontName(node.fontName)
-            ? {
-                family: node.fontName.family,
-                style: node.fontName.style,
-              }
-            : null,
-          fontSize: node.fontSize,
-          visible: isNodeVisible(node),
-        });
+        textLayers.push(createTextLayerObject(node));
       }
     }
 
@@ -81,6 +70,23 @@ export const pluginApi = createPluginAPI({
   },
 });
 
+function createTextLayerObject(node) {
+  return {
+    id: node.id,
+    name: node.name,
+    characters: node.characters,
+    fontName: isFontName(node.fontName)
+      ? {
+          family: node.fontName.family,
+          style: node.fontName.style,
+        }
+      : null,
+    fontSize: node.fontSize,
+    visible: isNodeVisible(node),
+    guidelineResults: validateText(node.characters),
+  };
+}
+
 // Helper function to check if a node and all its parents are visible
 function isNodeVisible(node: BaseNode): boolean {
   let current: BaseNode | null = node;
@@ -95,19 +101,7 @@ function findTextLayersInNode(node, textLayers) {
   if ("children" in node) {
     for (const child of node.children) {
       if (child.type === "TEXT") {
-        textLayers.push({
-          id: child.id,
-          name: child.name,
-          characters: child.characters,
-          fontName: isFontName(child.fontName)
-            ? {
-                family: child.fontName.family,
-                style: child.fontName.style,
-              }
-            : null,
-          fontSize: child.fontSize,
-          visible: isNodeVisible(child),
-        });
+        textLayers.push(createTextLayerObject(child));
       } else if ("children" in child) {
         findTextLayersInNode(child, textLayers);
       }
