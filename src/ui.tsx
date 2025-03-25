@@ -101,6 +101,21 @@ function App() {
 
   const stats = calculateStats();
 
+  // Sort text layers with failing ones at top
+  const sortedTextLayers = React.useMemo(() => {
+    return [...textLayers].sort((a, b) => {
+      const aAllPassing = Object.values(a.guidelineResults || {}).every(
+        (result) => result
+      );
+      const bAllPassing = Object.values(b.guidelineResults || {}).every(
+        (result) => result
+      );
+
+      if (aAllPassing === bAllPassing) return 0;
+      return aAllPassing ? 1 : -1; // Failing layers go to top
+    });
+  }, [textLayers]);
+
   return (
     <main className="bg-white h-[100vh] flex flex-col">
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-300 bg-white">
@@ -183,13 +198,16 @@ function App() {
           <div className="absolute top-0 translate-y-2 left-16 w-[230px] h-[10px] blur-xl bg-scarlet-500 z-20"></div>
           <div className="absolute top-0  left-16 w-[200px] h-[1.5px]  bg-gradient-to-r from-slate-100/0 via-scarlet-600 to-slate-100/0 z-20"></div>
           <div className="flex flex-col gap-2 relative z-40">
-            {textLayers.map((layer) => (
+            {sortedTextLayers.map((layer) => (
               <div
                 key={layer.id}
-                className="shadow-button-base bg-white transition-all flex flex-col text-slate-900  rounded cursor-pointer text-xs"
+                className="shadow-button-base bg-white transition-all flex flex-col text-slate-900  rounded text-xs"
               >
                 {/* Layer Header */}
-                <div className="flex items-start justify-between border-b py-2 px-2.5">
+                <div
+                  className="flex items-start justify-between border-b py-2 px-2.5  cursor-pointer"
+                  onClick={() => selectAndZoomToLayer(layer.id)}
+                >
                   <div className="flex items-start gap-2">
                     <div className="flex-1 py-1">
                       {layer.visible ? (
@@ -205,10 +223,7 @@ function App() {
                       </span>
                     </div>
                   </div>
-                  <div
-                    className="hover:bg-slate-200 px-1 rounded-md"
-                    onClick={() => selectAndZoomToLayer(layer.id)}
-                  >
+                  <div className="hover:bg-slate-200 px-1 rounded-md">
                     <TbArrowRight className="text-scarlet-600 w-4 h-4 my-1" />
                   </div>
                 </div>
@@ -250,7 +265,7 @@ function App() {
                   ) : (
                     <div className=" flex items-center gap-2">
                       <TbAlertSquareRounded className="text-scarlet-600  w-4 h-4 my-1" />
-                      <div>Needs attenstion</div>
+                      <div>Needs attention</div>
                     </div>
                   )}
                 </div>
