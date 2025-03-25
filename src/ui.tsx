@@ -33,8 +33,9 @@ function App() {
 
   // Set up selection change handler
   React.useEffect(() => {
+    // Remove the automatic refresh on selection change
     setEventCallback("selectionChanged", () => {
-      fetchTextLayers();
+      // No longer calling fetchTextLayers here
     });
 
     // Initial fetch
