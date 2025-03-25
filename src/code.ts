@@ -1,6 +1,7 @@
-figma.showUI(__html__, { themeColors: true, height: 450, width: 350 });
-
 import * as api from "./api";
+
+// Set the UI size
+figma.showUI(__html__, { themeColors: true, height: 500, width: 800 });
 
 figma.on("selectionchange", () => {
   api.uiApi.selectionChanged(figma.currentPage.selection);

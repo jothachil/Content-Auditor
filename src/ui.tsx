@@ -1,90 +1,92 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import "./ui.css";
-import { pluginApi } from "./api";
-import { Input, Button, Label } from "react-figma-plugin-ds";
+import { pluginApi, setEventCallback } from "./api";
+import { Button } from "react-figma-plugin-ds";
 import "react-figma-plugin-ds/figma-plugin-ds.css";
 
-function App() {
-  const [count, setCount] = React.useState<string>("1");
-  const [rotation, setRotation] = React.useState<string>("0");
-  const [color, setColor] = React.useState<string>("#FF8A65");
-  const [sizeIncrement, setSizeIncrement] = React.useState<string>("0");
+interface TextLayer {
+  id: string;
+  name: string;
+  characters: string;
+  fontName: any;
+  fontSize: number;
+}
 
-  const onCreate = () => {
-    const rectangleCount = Number(count) || 0;
-    const rotationIncrement = Number(rotation) || 0;
-    const sizeInc = Number(sizeIncrement) || 0;
-    pluginApi.createRectangle(
-      rectangleCount,
-      rotationIncrement,
-      color,
-      sizeInc
-    );
-    pluginApi.notify("Created Rectangles");
+function App() {
+  const [textLayers, setTextLayers] = React.useState<TextLayer[]>([]);
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+
+  // Function to fetch text layers from the current selection
+  const fetchTextLayers = React.useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const layers = await pluginApi.getTextLayersInSelection();
+      setTextLayers(layers);
+    } catch (error) {
+      console.error("Error fetching text layers:", error);
+      pluginApi.notify("Error fetching text layers");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Set up selection change handler
+  React.useEffect(() => {
+    setEventCallback("selectionChanged", () => {
+      fetchTextLayers();
+    });
+
+    // Initial fetch
+    fetchTextLayers();
+  }, [fetchTextLayers]);
+
+  // Function to truncate long text
+  const truncateText = (text: string, maxLength: number = 50) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + "...";
   };
 
   return (
-    <main className="bg-white h-[100vh] relative">
-      <div className="flex flex-col">
-        <div className="flex gap-2 items-start border-b border-gray-200 p-2">
-          <Label className="" size="small" weight="medium">
-            Number of Rectangles
-          </Label>
-          <div className="w-[300px]">
-            <Input
-              defaultValue={count}
-              onChange={(value) => setCount(value)}
-              placeholder="Enter number of rectangles"
-              type="number"
-            />
-          </div>
-        </div>
-        <div className="flex gap-2 items-start border-b border-gray-200 p-2">
-          <Label className="" size="small" weight="medium">
-            Rotation Increment
-          </Label>
-          <div className="w-[300px]">
-            <Input
-              defaultValue={rotation}
-              onChange={(value) => setRotation(value)}
-              placeholder="Enter rotation increment"
-              type="number"
-            />
-          </div>
-        </div>
-        <div className="flex gap-2 items-start border-b border-gray-200 p-2">
-          <Label className="" size="small" weight="medium">
-            Color
-          </Label>
-          <div className="w-[300px]">
-            <input
-              type="color"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-              className="w-8 h-8 border-none bg-transparent outline-none border-white rounded overflow-hidden"
-            />
-          </div>
-        </div>
-        <div className="flex gap-2 items-start border-b border-gray-200 p-2">
-          <Label className="" size="small" weight="medium">
-            Size Increment
-          </Label>
-          <div className="w-[300px]">
-            <Input
-              defaultValue={sizeIncrement}
-              onChange={(value) => setSizeIncrement(value)}
-              placeholder="Enter size increment"
-              type="number"
-            />
-          </div>
-        </div>
+    <main className="bg-white h-[100vh] flex flex-col p-4">
+      <h2 className="text-xl font-bold mb-4">Text Layers in Selection</h2>
 
-        <div className="absolute bottom-0 left-0 w-full p-2 border-t border-gray-200">
-          <Button className="w-full flex justify-center" onClick={onCreate}>
-            Create Rectangles
-          </Button>
+      <div className="mb-4">
+        <Button onClick={fetchTextLayers} isDisabled={isLoading}>
+          {isLoading ? "Loading..." : "Refresh Text Layers"}
+        </Button>
+      </div>
+
+      {textLayers.length === 0 ? (
+        <div className="text-center p-4 text-gray-500">
+          {isLoading
+            ? "Loading..."
+            : "No text layers found in selection. Select frames containing text layers."}
         </div>
+      ) : (
+        <div className="flex-1 overflow-auto">
+          <div className="grid grid-cols-[1fr,1fr] gap-2 font-bold mb-2 p-2 bg-gray-100">
+            <div>Content</div>
+            <div>Font Size</div>
+          </div>
+
+          {textLayers.map((layer) => (
+            <div
+              key={layer.id}
+              className="grid grid-cols-[1fr,1fr] gap-2 p-2 border-b border-gray-200 hover:bg-gray-50"
+            >
+              <div className="truncate" title={layer.characters}>
+                {truncateText(layer.characters)}
+              </div>
+              <div>{layer.fontSize}px</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-4 text-sm text-gray-500">
+        Total: {textLayers.length} text layer
+        {textLayers.length !== 1 ? "s" : ""}
       </div>
     </main>
   );
