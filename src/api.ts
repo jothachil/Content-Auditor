@@ -56,6 +56,27 @@ export const pluginApi = createPluginAPI({
 
     return textLayers;
   },
+  async selectAndZoomToNode(nodeId: string) {
+    try {
+      console.log("API: Selecting node with ID:", nodeId);
+      // Use the async version of getNodeById
+      const node = await figma.getNodeByIdAsync(nodeId);
+
+      if (!node || !("parent" in node)) {
+        console.log("API: Node not found or not selectable with ID:", nodeId);
+        return false;
+      }
+
+      console.log("API: Node found, type:", node.type);
+      // Cast to SceneNode since we've verified it has a parent (is a SceneNode)
+      figma.currentPage.selection = [node as SceneNode];
+      figma.viewport.scrollAndZoomIntoView([node as SceneNode]);
+      return true;
+    } catch (error) {
+      console.error("API: Error in selectAndZoomToNode:", error);
+      return false;
+    }
+  },
 });
 
 // Helper function to recursively find text layers in a node
