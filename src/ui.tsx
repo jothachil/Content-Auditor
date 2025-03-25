@@ -98,10 +98,15 @@ function App() {
         </div>
       </div>
       {textLayers.length === 0 ? (
-        <div className="text-center p-4 text-gray-500">
-          {isLoading
-            ? "Loading..."
-            : "No text layers found in selection. Select frames containing text layers."}
+        <div className=" bg-slate-200 text-xss flex-1 flex items-center justify-center  ">
+          <div className="flex flex-col items-center">
+            <TbTypography className="text-gray-400  w-20 h-20 my-1" />
+            <div className="text-center  text-gray-500 w-[300px]">
+              {isLoading
+                ? "Loading..."
+                : "No text layers found in selection. Select frames containing text layers."}
+            </div>
+          </div>
         </div>
       ) : (
         <div className="p-2 relative bg-slate-200 grid-image h-[650px] overflow-y-scroll">
