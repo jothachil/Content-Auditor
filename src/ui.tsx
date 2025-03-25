@@ -75,6 +75,32 @@ function App() {
     }
   };
 
+  // Calculate summary statistics
+  const calculateStats = () => {
+    if (textLayers.length === 0) return null;
+
+    const stats = {
+      total: textLayers.length,
+      passing: 0,
+      failing: 0,
+    };
+
+    textLayers.forEach((layer) => {
+      const allPassing = Object.values(layer.guidelineResults || {}).every(
+        (result) => result
+      );
+      if (allPassing) {
+        stats.passing++;
+      } else {
+        stats.failing++;
+      }
+    });
+
+    return stats;
+  };
+
+  const stats = calculateStats();
+
   return (
     <main className="bg-white h-[100vh] flex flex-col">
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-300 bg-white">
@@ -97,6 +123,40 @@ function App() {
           </a>
         </div>
       </div>
+      {stats && textLayers.length > 0 && (
+        <div className="px-4 py-2 border-b border-slate-300 bg-slate-50">
+          <div className="flex items-center justify-between">
+            <div className="text-xss text-slate-600">Guidelines Summary</div>
+            <div className="flex gap-3">
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                <span className="text-xss text-green-700">
+                  {stats.passing} passing
+                </span>
+              </div>
+              {stats.failing > 0 && (
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                  <span className="text-xss text-red-700">
+                    {stats.failing} failing
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="mt-1.5 w-full bg-slate-200 rounded-full h-1.5">
+            <div
+              className={`h-full rounded-full ${
+                stats.failing === 0 ? "bg-green-500" : "bg-scarlet-500"
+              }`}
+              style={{
+                width: `${(stats.passing / stats.total) * 100}%`,
+                transition: "width 0.3s ease-in-out",
+              }}
+            ></div>
+          </div>
+        </div>
+      )}
       {!hasSelection ? (
         <div className="bg-slate-200 text-xss flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center">
