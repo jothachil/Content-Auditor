@@ -1,5 +1,5 @@
 {
-  "name": "Auditor",
+  "name": "Content Auditor",
   "id": "1486602039092312236",
   "api": "1.0.0",
   "networkAccess": { "allowedDomains": ["none"] },

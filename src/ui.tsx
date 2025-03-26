@@ -20,6 +20,7 @@ import TextStyleStatsSummary from "./components/TextStyleStatsSummary";
 import NoSelectionMessage from "./components/NoSelectionMessage";
 import EmptyTextLayers from "./components/EmptyTextLayers";
 import RefreshButton from "./components/RefreshButton";
+import { TbFilter } from "react-icons/tb";
 
 function App() {
   const [textLayers, setTextLayers] = React.useState<TextLayer[]>([]);
@@ -185,6 +186,16 @@ function App() {
         <NoSelectionMessage hasSelection={hasSelection} isLoading={isLoading} />
       ) : textLayers.length === 0 ? (
         <EmptyTextLayers isLoading={isLoading} />
+      ) : filteredLayers.length === 0 ? (
+        <div className="bg-slate-200 text-xss flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center">
+            <TbFilter className="text-gray-400 w-20 h-20 my-1" />
+            <div className="text-center text-gray-500 w-[300px]">
+              No text layers match the current filters. Try changing your filter
+              settings.
+            </div>
+          </div>
+        </div>
       ) : (
         <div className="flex-1 p-2 relative bg-slate-200 grid-image overflow-y-scroll">
           <div className="absolute top-0 translate-y-2 left-16 w-[230px] h-[10px] blur-xl bg-scarlet-500 z-20"></div>
