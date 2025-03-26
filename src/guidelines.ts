@@ -9,15 +9,10 @@ export const guidelines: Guideline[] = [
   {
     id: "sentence-case",
     name: "Sentence case",
-    description: "First letter capitalized, rest lowercase",
+    description: "First character capitalized or number, rest lowercase",
     validate: (text: string) => {
       if (!text) return true;
-      const firstChar = text.charAt(0);
-      const restOfText = text.slice(1);
-      return (
-        firstChar === firstChar.toUpperCase() &&
-        restOfText === restOfText.toLowerCase()
-      );
+      return /^[A-Z0-9][a-z\s]*$/.test(text);
     },
   },
   {
@@ -25,7 +20,7 @@ export const guidelines: Guideline[] = [
     name: "No trailing spaces",
     description: "Text should not have trailing spaces",
     validate: (text: string) => {
-      return !text.endsWith(" ");
+      return !/\s$/.test(text);
     },
   },
   {
@@ -33,7 +28,7 @@ export const guidelines: Guideline[] = [
     name: "No double spaces",
     description: "Text should not contain double spaces",
     validate: (text: string) => {
-      return !text.includes("  ");
+      return !/\s{2,}/.test(text);
     },
   },
 ];
