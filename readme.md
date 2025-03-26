@@ -17,6 +17,101 @@ A Figma plugin to audit and validate text layers in your designs based on UX wri
   - Text style usage
   - Visibility state (visible/hidden)
 
+## Adding Custom Guidelines
+
+The Content Auditor is designed to be easily extensible with new content guidelines. If you need to add custom validation rules based on your organization's requirements, follow these steps:
+
+### 1. Edit the `guidelines.ts` file
+
+Open the `src/guidelines.ts` file and add your new guideline to the array:
+
+```typescript
+export const guidelines: Guideline[] = [
+  // Existing guidelines
+  {
+    id: "sentence-case",
+    name: "Sentence case",
+    description:
+      "First character capitalized or number or symbol, rest lowercase",
+    validate: (text: string) => {
+      if (!text) return true;
+      return /^[A-Z0-9₹$€£¥\u20B9][\sa-z0-9₹$€£¥\u20B9]*$/.test(text);
+    },
+  },
+  // ... other existing guidelines ...
+
+  // Your new custom guideline
+  {
+    id: "your-guideline-id",
+    name: "Your Guideline Name",
+    description: "Description of what this guideline checks for",
+    validate: (text: string) => {
+      // Your validation logic here, returning true if passing, false if failing
+      return yourValidationFunction(text);
+    },
+  },
+];
+```
+
+### 2. Create your validation function
+
+Each guideline requires a `validate` function that:
+
+- Takes a string as input (the text from a Figma text layer)
+- Returns a boolean (true if the text passes the guideline, false if it fails)
+
+You can implement your validation using:
+
+- Regular expressions (for pattern matching)
+- JavaScript string methods
+- Custom logic based on your requirements
+
+### 3. Common validation patterns
+
+Here are some example patterns for common content guidelines:
+
+```typescript
+// No more than 150 characters
+{
+  id: "max-length",
+  name: "Maximum Length",
+  description: "Text should not exceed 150 characters",
+  validate: (text: string) => text.length <= 150,
+}
+
+// Must contain specific keywords
+{
+  id: "required-keywords",
+  name: "Required Keywords",
+  description: "Must contain at least one of the required keywords",
+  validate: (text: string) => {
+    const keywords = ["important", "notice", "warning"];
+    return keywords.some(keyword => text.toLowerCase().includes(keyword));
+  },
+}
+
+// No jargon or technical terms
+{
+  id: "no-jargon",
+  name: "No Technical Jargon",
+  description: "Avoid technical terminology",
+  validate: (text: string) => {
+    const jargonTerms = ["frontend", "backend", "API", "SDK"];
+    return !jargonTerms.some(term => text.includes(term));
+  },
+}
+```
+
+### 4. Rebuild the plugin
+
+After adding your new guidelines, rebuild the plugin:
+
+```bash
+pnpm build
+```
+
+Then reload the plugin in Figma to see your new guidelines in action.
+
 ## Installation
 
 1. In Figma, click on **Plugins** in the menu
