@@ -32,13 +32,18 @@ interface TextLayer {
 }
 
 type FilterType = "all" | "unstyledOnly" | "failingOnly";
+type VisibilityFilterType = "all" | "visible" | "hidden";
 
 function App() {
   const [textLayers, setTextLayers] = React.useState<TextLayer[]>([]);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [hasSelection, setHasSelection] = React.useState<boolean>(true);
   const [filterType, setFilterType] = React.useState<FilterType>("all");
+  const [visibilityFilter, setVisibilityFilter] =
+    React.useState<VisibilityFilterType>("all");
   const [isFilterOpen, setIsFilterOpen] = React.useState<boolean>(false);
+  const [isVisibilityFilterOpen, setIsVisibilityFilterOpen] =
+    React.useState<boolean>(false);
 
   // Function to fetch text layers from the current selection
   const fetchTextLayers = React.useCallback(async () => {
@@ -147,24 +152,36 @@ function App() {
 
   const filteredLayers = React.useMemo(() => {
     return sortedTextLayers.filter((layer) => {
-      if (filterType === "unstyledOnly") {
-        return !layer.textStyleId;
+      // Style/Guidelines filter
+      if (filterType === "unstyledOnly" && layer.textStyleId) {
+        return false;
       }
-      if (filterType === "failingOnly") {
-        return !Object.values(layer.guidelineResults || {}).every(
-          (result) => result
-        );
+      if (
+        filterType === "failingOnly" &&
+        Object.values(layer.guidelineResults || {}).every((result) => result)
+      ) {
+        return false;
       }
+
+      // Visibility filter
+      if (visibilityFilter === "visible" && !layer.visible) {
+        return false;
+      }
+      if (visibilityFilter === "hidden" && layer.visible) {
+        return false;
+      }
+
       return true;
     });
-  }, [sortedTextLayers, filterType]);
+  }, [sortedTextLayers, filterType, visibilityFilter]);
 
   // Add this effect in your App component
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (!target.closest(".relative")) {
+      if (!target.closest(".filter-dropdown")) {
         setIsFilterOpen(false);
+        setIsVisibilityFilterOpen(false);
       }
     };
 
@@ -179,65 +196,139 @@ function App() {
       <div className="flex items-center justify-between px-3 py-3 border-b border-slate-300 bg-slate-50">
         <div className="flex items-center gap-1 text-slate-700 text-xss">
           <div className="">
-            <TbTypography className="text-scarlet-600  w-4 h-4 my-1" />
+            <TbTypography className="text-scarlet-600 w-4 h-4 my-1" />
           </div>
           {textLayers.length} text layer
           {textLayers.length !== 1 ? "s" : ""}
         </div>
-        <div className="relative">
-          <button
-            onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="flex items-center gap-1 text-slate-600 hover:text-slate-700 text-xss px-2 py-2 rounded transition-all shadow-button-base w-24 bg-white "
-          >
-            <TbFilter className="w-4 h-4" />
-            {filterType === "all"
-              ? "All"
-              : filterType === "unstyledOnly"
-              ? "Unstyled"
-              : "Failing"}
-          </button>
+        <div className="flex gap-2">
+          {/* Existing Filter */}
+          <div className="relative filter-dropdown">
+            <button
+              onClick={() => {
+                setIsFilterOpen(!isFilterOpen);
+                setIsVisibilityFilterOpen(false);
+              }}
+              className="flex items-center gap-1 text-slate-600 hover:text-slate-700 text-xss px-2 py-2 rounded transition-all shadow-button-base w-24 bg-white"
+            >
+              <TbFilter className="w-4 h-4" />
+              {filterType === "all"
+                ? "All"
+                : filterType === "unstyledOnly"
+                ? "Unstyled"
+                : "Failing"}
+            </button>
 
-          {isFilterOpen && (
-            <div className="absolute right-0 top-full mt-1 bg-white rounded-md shadow-lg border border-slate-200 py-1 z-50">
-              <button
-                onClick={() => {
-                  setFilterType("all");
-                  setIsFilterOpen(false);
-                }}
-                className={`w-full text-left px-3 py-1.5 text-xss hover:bg-slate-100 ${
-                  filterType === "all" ? "text-scarlet-600" : "text-slate-600"
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => {
-                  setFilterType("unstyledOnly");
-                  setIsFilterOpen(false);
-                }}
-                className={`w-full text-left px-3 py-1.5 text-xss hover:bg-slate-100 ${
-                  filterType === "unstyledOnly"
-                    ? "text-scarlet-600"
-                    : "text-slate-600"
-                }`}
-              >
-                Unstyled
-              </button>
-              <button
-                onClick={() => {
-                  setFilterType("failingOnly");
-                  setIsFilterOpen(false);
-                }}
-                className={`w-full text-left px-3 py-1.5 text-xss hover:bg-slate-100 ${
-                  filterType === "failingOnly"
-                    ? "text-scarlet-600"
-                    : "text-slate-600"
-                }`}
-              >
-                Failing
-              </button>
-            </div>
-          )}
+            {isFilterOpen && (
+              <div className="absolute right-0 top-full mt-1 bg-white rounded-md shadow-lg border border-slate-200 py-1 z-50">
+                <button
+                  onClick={() => {
+                    setFilterType("all");
+                    setIsFilterOpen(false);
+                  }}
+                  className={`w-full text-left px-3 py-1.5 text-xss hover:bg-slate-100 ${
+                    filterType === "all" ? "text-scarlet-600" : "text-slate-600"
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => {
+                    setFilterType("unstyledOnly");
+                    setIsFilterOpen(false);
+                  }}
+                  className={`w-full text-left px-3 py-1.5 text-xss hover:bg-slate-100 ${
+                    filterType === "unstyledOnly"
+                      ? "text-scarlet-600"
+                      : "text-slate-600"
+                  }`}
+                >
+                  Unstyled
+                </button>
+                <button
+                  onClick={() => {
+                    setFilterType("failingOnly");
+                    setIsFilterOpen(false);
+                  }}
+                  className={`w-full text-left px-3 py-1.5 text-xss hover:bg-slate-100 ${
+                    filterType === "failingOnly"
+                      ? "text-scarlet-600"
+                      : "text-slate-600"
+                  }`}
+                >
+                  Failing
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* New Visibility Filter */}
+          <div className="relative filter-dropdown">
+            <button
+              onClick={() => {
+                setIsVisibilityFilterOpen(!isVisibilityFilterOpen);
+                setIsFilterOpen(false);
+              }}
+              className="flex items-center gap-1 text-slate-600 hover:text-slate-700 text-xss px-2 py-2 rounded transition-all shadow-button-base w-24 bg-white"
+            >
+              {visibilityFilter === "visible" ? (
+                <TbEye className="w-4 h-4" />
+              ) : visibilityFilter === "hidden" ? (
+                <TbEyeOff className="w-4 h-4" />
+              ) : (
+                <TbEye className="w-4 h-4" />
+              )}
+              {visibilityFilter === "all"
+                ? "All"
+                : visibilityFilter === "visible"
+                ? "Visible"
+                : "Hidden"}
+            </button>
+
+            {isVisibilityFilterOpen && (
+              <div className="absolute right-0 top-full mt-1 bg-white rounded-md shadow-lg border border-slate-200 py-1 z-50">
+                <button
+                  onClick={() => {
+                    setVisibilityFilter("all");
+                    setIsVisibilityFilterOpen(false);
+                  }}
+                  className={`w-full text-left px-3 py-1.5 text-xss hover:bg-slate-100 ${
+                    visibilityFilter === "all"
+                      ? "text-scarlet-600"
+                      : "text-slate-600"
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => {
+                    setVisibilityFilter("visible");
+                    setIsVisibilityFilterOpen(false);
+                  }}
+                  className={`w-full text-left px-3 py-1.5 text-xss hover:bg-slate-100 ${
+                    visibilityFilter === "visible"
+                      ? "text-scarlet-600"
+                      : "text-slate-600"
+                  }`}
+                >
+                  Visible
+                </button>
+                <button
+                  onClick={() => {
+                    setVisibilityFilter("hidden");
+                    setIsVisibilityFilterOpen(false);
+                  }}
+                  className={`w-full text-left px-3 py-1.5 text-xss hover:bg-slate-100 ${
+                    visibilityFilter === "hidden"
+                      ? "text-scarlet-600"
+                      : "text-slate-600"
+                  }`}
+                >
+                  Hidden
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
