@@ -12,6 +12,7 @@ import {
   TbEye,
   TbEyeOff,
   TbAlertSquareRounded,
+  TbFilter,
 } from "react-icons/tb";
 import { validateText, guidelines } from "./guidelines";
 
@@ -30,10 +31,14 @@ interface TextLayer {
   textStyleName?: string;
 }
 
+type FilterType = "all" | "unstyledOnly" | "failingOnly";
+
 function App() {
   const [textLayers, setTextLayers] = React.useState<TextLayer[]>([]);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [hasSelection, setHasSelection] = React.useState<boolean>(true);
+  const [filterType, setFilterType] = React.useState<FilterType>("all");
+  const [isFilterOpen, setIsFilterOpen] = React.useState<boolean>(false);
 
   // Function to fetch text layers from the current selection
   const fetchTextLayers = React.useCallback(async () => {
@@ -140,9 +145,38 @@ function App() {
     });
   }, [textLayers]);
 
+  const filteredLayers = React.useMemo(() => {
+    return sortedTextLayers.filter((layer) => {
+      if (filterType === "unstyledOnly") {
+        return !layer.textStyleId;
+      }
+      if (filterType === "failingOnly") {
+        return !Object.values(layer.guidelineResults || {}).every(
+          (result) => result
+        );
+      }
+      return true;
+    });
+  }, [sortedTextLayers, filterType]);
+
+  // Add this effect in your App component
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest(".relative")) {
+        setIsFilterOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <main className="bg-white h-[100vh] flex flex-col">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-300 bg-white">
+      <div className="flex items-center justify-between px-3 py-3 border-b border-slate-300 bg-slate-50">
         <div className="flex items-center gap-1 text-slate-700 text-xss">
           <div className="">
             <TbTypography className="text-scarlet-600  w-4 h-4 my-1" />
@@ -150,88 +184,63 @@ function App() {
           {textLayers.length} text layer
           {textLayers.length !== 1 ? "s" : ""}
         </div>
-        <div className=" text-center  flex justify-center items-center gap-1">
-          <a
-            href="https://buymeacoffee.com/jothachil"
-            target="_blank"
-            className="flex items-center gap-1 text-slate-400 hover:text-slate-500 text-xss  px-2 py-1 rounded-md transition-all"
+        <div className="relative">
+          <button
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            className="flex items-center gap-1 text-slate-600 hover:text-slate-700 text-xss px-2 py-2 rounded transition-all shadow-button-base w-24 bg-white "
           >
-            <div className="flex items-center gap-1">
-              Donate <TbHeartFilled className="text-red-600 w-4 h-4" />
+            <TbFilter className="w-4 h-4" />
+            {filterType === "all"
+              ? "All"
+              : filterType === "unstyledOnly"
+              ? "Unstyled"
+              : "Failing"}
+          </button>
+
+          {isFilterOpen && (
+            <div className="absolute right-0 top-full mt-1 bg-white rounded-md shadow-lg border border-slate-200 py-1 z-50">
+              <button
+                onClick={() => {
+                  setFilterType("all");
+                  setIsFilterOpen(false);
+                }}
+                className={`w-full text-left px-3 py-1.5 text-xss hover:bg-slate-100 ${
+                  filterType === "all" ? "text-scarlet-600" : "text-slate-600"
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => {
+                  setFilterType("unstyledOnly");
+                  setIsFilterOpen(false);
+                }}
+                className={`w-full text-left px-3 py-1.5 text-xss hover:bg-slate-100 ${
+                  filterType === "unstyledOnly"
+                    ? "text-scarlet-600"
+                    : "text-slate-600"
+                }`}
+              >
+                Unstyled
+              </button>
+              <button
+                onClick={() => {
+                  setFilterType("failingOnly");
+                  setIsFilterOpen(false);
+                }}
+                className={`w-full text-left px-3 py-1.5 text-xss hover:bg-slate-100 ${
+                  filterType === "failingOnly"
+                    ? "text-scarlet-600"
+                    : "text-slate-600"
+                }`}
+              >
+                Failing
+              </button>
             </div>
-          </a>
+          )}
         </div>
       </div>
-      {guidelineStats && textLayers.length > 0 && (
-        <div className="px-4 py-2 border-b border-slate-300 bg-slate-50">
-          <div className="flex items-center justify-between">
-            <div className="text-xss text-slate-600">Guidelines Summary</div>
-            <div className="flex gap-3">
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                <span className="text-xss text-green-700">
-                  {guidelineStats.passing} passing
-                </span>
-              </div>
-              {guidelineStats.failing > 0 && (
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                  <span className="text-xss text-red-700">
-                    {guidelineStats.failing} failing
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="mt-1.5 w-full bg-slate-200 rounded-full h-1.5">
-            <div
-              className={`h-full rounded-full ${
-                guidelineStats.failing === 0 ? "bg-green-500" : "bg-scarlet-500"
-              }`}
-              style={{
-                width: `${
-                  (guidelineStats.passing / guidelineStats.total) * 100
-                }%`,
-                transition: "width 0.3s ease-in-out",
-              }}
-            ></div>
-          </div>
-        </div>
-      )}
-      {textStyleStats && textLayers.length > 0 && (
-        <div className="px-4 py-2 border-b border-slate-300 bg-slate-50">
-          <div className="flex items-center justify-between">
-            <div className="text-xss text-slate-600">Text Style Usage</div>
-            <div className="flex gap-3">
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-scarlet-500"></div>
-                <span className="text-xss text-scarlet-700">
-                  {textStyleStats.withStyle} styled
-                </span>
-              </div>
-              {textStyleStats.withoutStyle > 0 && (
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-slate-400"></div>
-                  <span className="text-xss text-slate-700">
-                    {textStyleStats.withoutStyle} unstyled
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="mt-1.5 w-full bg-slate-200 rounded-full h-1.5">
-            <div
-              className="h-full rounded-full bg-scarlet-500"
-              style={{
-                width: `${
-                  (textStyleStats.withStyle / textStyleStats.total) * 100
-                }%`,
-                transition: "width 0.3s ease-in-out",
-              }}
-            ></div>
-          </div>
-        </div>
-      )}
+
       {!hasSelection ? (
         <div className="bg-slate-200 text-xss flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center">
@@ -254,11 +263,11 @@ function App() {
           </div>
         </div>
       ) : (
-        <div className="p-2 relative bg-slate-200 grid-image overflow-y-scroll">
+        <div className="flex-1 p-2 relative bg-slate-200 grid-image overflow-y-scroll">
           <div className="absolute top-0 translate-y-2 left-16 w-[230px] h-[10px] blur-xl bg-scarlet-500 z-20"></div>
           <div className="absolute top-0  left-16 w-[200px] h-[1.5px]  bg-gradient-to-r from-slate-100/0 via-scarlet-600 to-slate-100/0 z-20"></div>
           <div className="flex flex-col gap-2 relative z-40">
-            {sortedTextLayers.map((layer) => (
+            {filteredLayers.map((layer) => (
               <div
                 key={layer.id}
                 className="shadow-button-base bg-white transition-all flex flex-col text-slate-900  rounded text-xs"
@@ -335,7 +344,77 @@ function App() {
           </div>
         </div>
       )}
-      <div className="bg-white flex justify-between items-center p-2 border-t border-slate-300">
+      {guidelineStats && textLayers.length > 0 && (
+        <div className="px-4 py-2 border-b border-t border-slate-300 bg-slate-50">
+          <div className="flex items-center justify-between">
+            <div className="text-xss text-slate-600">Guidelines Summary</div>
+            <div className="flex gap-3">
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                <span className="text-xss text-green-700">
+                  {guidelineStats.passing} passing
+                </span>
+              </div>
+              {guidelineStats.failing > 0 && (
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                  <span className="text-xss text-red-700">
+                    {guidelineStats.failing} failing
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="mt-1.5 w-full bg-slate-200 rounded-full h-1.5">
+            <div
+              className={`h-full rounded-full ${
+                guidelineStats.failing === 0 ? "bg-green-500" : "bg-scarlet-500"
+              }`}
+              style={{
+                width: `${
+                  (guidelineStats.passing / guidelineStats.total) * 100
+                }%`,
+                transition: "width 0.3s ease-in-out",
+              }}
+            ></div>
+          </div>
+        </div>
+      )}
+      {textStyleStats && textLayers.length > 0 && (
+        <div className="px-4 py-2 border-b border-slate-300 bg-slate-50">
+          <div className="flex items-center justify-between">
+            <div className="text-xss text-slate-600">Text Style Usage</div>
+            <div className="flex gap-3">
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded-full bg-scarlet-500"></div>
+                <span className="text-xss text-scarlet-700">
+                  {textStyleStats.withStyle} styled
+                </span>
+              </div>
+              {textStyleStats.withoutStyle > 0 && (
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-slate-400"></div>
+                  <span className="text-xss text-slate-700">
+                    {textStyleStats.withoutStyle} unstyled
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="mt-1.5 w-full bg-slate-200 rounded-full h-1.5">
+            <div
+              className="h-full rounded-full bg-scarlet-500"
+              style={{
+                width: `${
+                  (textStyleStats.withStyle / textStyleStats.total) * 100
+                }%`,
+                transition: "width 0.3s ease-in-out",
+              }}
+            ></div>
+          </div>
+        </div>
+      )}
+      <div className="bg-white flex justify-between items-center p-2 ">
         <button
           className="bg-scarlet-600 text-white text-xss py-2.5 rounded hover:bg-scarlet-700 w-full flex items-center justify-center gap-1 transition-all"
           onClick={fetchTextLayers}

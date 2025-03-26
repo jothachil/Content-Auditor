@@ -9,10 +9,11 @@ export const guidelines: Guideline[] = [
   {
     id: "sentence-case",
     name: "Sentence case",
-    description: "First character capitalized or number, rest lowercase",
+    description:
+      "First character capitalized or number or symbol, rest lowercase",
     validate: (text: string) => {
       if (!text) return true;
-      return /^[A-Z0-9][a-z\s]*$/.test(text);
+      return /^[A-Z0-9₹$€£¥\u20B9][\sa-z0-9₹$€£¥\u20B9]*$/.test(text);
     },
   },
   {
