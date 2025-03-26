@@ -15,7 +15,8 @@ import {
 // Import components
 import Header from "./components/Header";
 import TextLayerCard from "./components/TextLayerCard";
-import StatsSummary from "./components/StatsSummary";
+import GuidelineStatsSummary from "./components/GuidelineStatsSummary";
+import TextStyleStatsSummary from "./components/TextStyleStatsSummary";
 import NoSelectionMessage from "./components/NoSelectionMessage";
 import EmptyTextLayers from "./components/EmptyTextLayers";
 import RefreshButton from "./components/RefreshButton";
@@ -197,10 +198,10 @@ function App() {
         </div>
       )}
 
-      <StatsSummary
-        guidelineStats={guidelineStats}
-        textStyleStats={textStyleStats}
-      />
+      <>
+        <GuidelineStatsSummary guidelineStats={guidelineStats} />
+        <TextStyleStatsSummary textStyleStats={textStyleStats} />
+      </>
 
       <RefreshButton onRefresh={fetchTextLayers} isLoading={isLoading} />
     </main>
