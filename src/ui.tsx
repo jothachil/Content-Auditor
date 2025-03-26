@@ -26,6 +26,8 @@ interface TextLayer {
   fontSize: number;
   visible: boolean;
   guidelineResults?: Record<string, boolean>;
+  textStyleId?: string;
+  textStyleName?: string;
 }
 
 function App() {
@@ -220,6 +222,7 @@ function App() {
                       <span title={layer.characters}>{layer.characters}</span>
                       <span className="text-xss text-slate-500">
                         {layer.fontName?.family} • {layer.fontSize}px
+                        {layer.textStyleName && <> • {layer.textStyleName}</>}
                       </span>
                     </div>
                   </div>

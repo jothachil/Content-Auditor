@@ -29,7 +29,7 @@ export const pluginApi = createPluginAPI({
     figma.currentPage.selection = nodes;
     figma.viewport.scrollAndZoomIntoView(nodes);
   },
-  getTextLayersInSelection() {
+  async getTextLayersInSelection() {
     const selection = figma.currentPage.selection;
     const textLayers = [];
 
@@ -39,9 +39,9 @@ export const pluginApi = createPluginAPI({
         node.type === "GROUP" ||
         node.type === "SECTION"
       ) {
-        findTextLayersInNode(node, textLayers);
+        await findTextLayersInNode(node, textLayers);
       } else if (node.type === "TEXT") {
-        textLayers.push(createTextLayerObject(node));
+        textLayers.push(await createTextLayerObject(node));
       }
     }
 
@@ -70,7 +70,10 @@ export const pluginApi = createPluginAPI({
   },
 });
 
-function createTextLayerObject(node) {
+async function createTextLayerObject(node) {
+  const textStyle = node.textStyleId
+    ? await figma.getStyleByIdAsync(node.textStyleId)
+    : null;
   return {
     id: node.id,
     name: node.name,
@@ -84,6 +87,8 @@ function createTextLayerObject(node) {
     fontSize: node.fontSize,
     visible: isNodeVisible(node),
     guidelineResults: validateText(node.characters),
+    textStyleId: node.textStyleId || null,
+    textStyleName: textStyle?.name || null,
   };
 }
 
@@ -97,13 +102,13 @@ function isNodeVisible(node: BaseNode): boolean {
   return true;
 }
 
-function findTextLayersInNode(node, textLayers) {
+async function findTextLayersInNode(node, textLayers) {
   if ("children" in node) {
     for (const child of node.children) {
       if (child.type === "TEXT") {
-        textLayers.push(createTextLayerObject(child));
+        textLayers.push(await createTextLayerObject(child));
       } else if ("children" in child) {
-        findTextLayersInNode(child, textLayers);
+        await findTextLayersInNode(child, textLayers);
       }
     }
   }
