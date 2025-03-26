@@ -35,7 +35,9 @@ const TextStyleStatsSummary: React.FC<TextStyleStatsSummaryProps> = ({
       </div>
       <div className="mt-1.5 w-full bg-slate-200 rounded-full h-1.5">
         <div
-          className="h-full rounded-full bg-slate-900"
+          className={`h-full rounded-full ${
+            textStyleStats.withoutStyle === 0 ? "bg-green-500" : "bg-slate-900"
+          }`}
           style={{
             width: `${
               (textStyleStats.withStyle / textStyleStats.total) * 100
