@@ -174,7 +174,7 @@ function App() {
   return (
     <main className="bg-white h-[100vh] flex flex-col">
       <Header
-        textLayerCount={textLayers.length}
+        textLayerCount={filteredLayers.length}
         filterType={filterType}
         setFilterType={setFilterType}
         visibilityFilter={visibilityFilter}
