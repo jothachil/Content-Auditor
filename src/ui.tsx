@@ -101,7 +101,29 @@ function App() {
     return stats;
   };
 
-  const stats = calculateStats();
+  // Add this helper function near other stat calculations
+  const calculateTextStyleStats = () => {
+    if (textLayers.length === 0) return null;
+
+    const stats = {
+      total: textLayers.length,
+      withStyle: 0,
+      withoutStyle: 0,
+    };
+
+    textLayers.forEach((layer) => {
+      if (layer.textStyleId) {
+        stats.withStyle++;
+      } else {
+        stats.withoutStyle++;
+      }
+    });
+
+    return stats;
+  };
+
+  const guidelineStats = calculateStats();
+  const textStyleStats = calculateTextStyleStats();
 
   // Sort text layers with failing ones at top
   const sortedTextLayers = React.useMemo(() => {
@@ -140,7 +162,7 @@ function App() {
           </a>
         </div>
       </div>
-      {stats && textLayers.length > 0 && (
+      {guidelineStats && textLayers.length > 0 && (
         <div className="px-4 py-2 border-b border-slate-300 bg-slate-50">
           <div className="flex items-center justify-between">
             <div className="text-xss text-slate-600">Guidelines Summary</div>
@@ -148,14 +170,14 @@ function App() {
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 rounded-full bg-green-500"></div>
                 <span className="text-xss text-green-700">
-                  {stats.passing} passing
+                  {guidelineStats.passing} passing
                 </span>
               </div>
-              {stats.failing > 0 && (
+              {guidelineStats.failing > 0 && (
                 <div className="flex items-center gap-1">
                   <div className="w-2 h-2 rounded-full bg-red-500"></div>
                   <span className="text-xss text-red-700">
-                    {stats.failing} failing
+                    {guidelineStats.failing} failing
                   </span>
                 </div>
               )}
@@ -164,10 +186,46 @@ function App() {
           <div className="mt-1.5 w-full bg-slate-200 rounded-full h-1.5">
             <div
               className={`h-full rounded-full ${
-                stats.failing === 0 ? "bg-green-500" : "bg-scarlet-500"
+                guidelineStats.failing === 0 ? "bg-green-500" : "bg-scarlet-500"
               }`}
               style={{
-                width: `${(stats.passing / stats.total) * 100}%`,
+                width: `${
+                  (guidelineStats.passing / guidelineStats.total) * 100
+                }%`,
+                transition: "width 0.3s ease-in-out",
+              }}
+            ></div>
+          </div>
+        </div>
+      )}
+      {textStyleStats && textLayers.length > 0 && (
+        <div className="px-4 py-2 border-b border-slate-300 bg-slate-50">
+          <div className="flex items-center justify-between">
+            <div className="text-xss text-slate-600">Text Style Usage</div>
+            <div className="flex gap-3">
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded-full bg-scarlet-500"></div>
+                <span className="text-xss text-scarlet-700">
+                  {textStyleStats.withStyle} styled
+                </span>
+              </div>
+              {textStyleStats.withoutStyle > 0 && (
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-slate-400"></div>
+                  <span className="text-xss text-slate-700">
+                    {textStyleStats.withoutStyle} unstyled
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="mt-1.5 w-full bg-slate-200 rounded-full h-1.5">
+            <div
+              className="h-full rounded-full bg-scarlet-500"
+              style={{
+                width: `${
+                  (textStyleStats.withStyle / textStyleStats.total) * 100
+                }%`,
                 transition: "width 0.3s ease-in-out",
               }}
             ></div>
