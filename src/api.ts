@@ -71,9 +71,15 @@ export const pluginApi = createPluginAPI({
 });
 
 async function createTextLayerObject(node) {
-  const textStyle = node.textStyleId
-    ? await figma.getStyleByIdAsync(node.textStyleId)
-    : null;
+  let textStyle = null;
+  try {
+    if (node.textStyleId && typeof node.textStyleId === "string") {
+      textStyle = await figma.getStyleByIdAsync(node.textStyleId);
+    }
+  } catch (error) {
+    console.warn("Error fetching text style:", error);
+  }
+
   return {
     id: node.id,
     name: node.name,
@@ -87,7 +93,7 @@ async function createTextLayerObject(node) {
     fontSize: node.fontSize,
     visible: isNodeVisible(node),
     guidelineResults: validateText(node.characters),
-    textStyleId: node.textStyleId || null,
+    textStyleId: typeof node.textStyleId === "string" ? node.textStyleId : null,
     textStyleName: textStyle?.name || null,
   };
 }
