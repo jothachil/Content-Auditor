@@ -66,16 +66,16 @@ function App() {
   };
 
   // Calculate summary statistics
-  const calculateStats = (): GuidelineStats | null => {
-    if (textLayers.length === 0) return null;
+  const calculateStats = (layers: TextLayer[]): GuidelineStats | null => {
+    if (layers.length === 0) return null;
 
     const stats = {
-      total: textLayers.length,
+      total: layers.length,
       passing: 0,
       failing: 0,
     };
 
-    textLayers.forEach((layer) => {
+    layers.forEach((layer) => {
       const allPassing = Object.values(layer.guidelineResults || {}).every(
         (result) => result
       );
@@ -90,16 +90,18 @@ function App() {
   };
 
   // Calculate text style stats
-  const calculateTextStyleStats = (): TextStyleStats | null => {
-    if (textLayers.length === 0) return null;
+  const calculateTextStyleStats = (
+    layers: TextLayer[]
+  ): TextStyleStats | null => {
+    if (layers.length === 0) return null;
 
     const stats = {
-      total: textLayers.length,
+      total: layers.length,
       withStyle: 0,
       withoutStyle: 0,
     };
 
-    textLayers.forEach((layer) => {
+    layers.forEach((layer) => {
       if (layer.textStyleId) {
         stats.withStyle++;
       } else {
@@ -109,9 +111,6 @@ function App() {
 
     return stats;
   };
-
-  const guidelineStats = calculateStats();
-  const textStyleStats = calculateTextStyleStats();
 
   // Sort text layers with failing ones at top
   const sortedTextLayers = React.useMemo(() => {
@@ -152,6 +151,10 @@ function App() {
       return true;
     });
   }, [sortedTextLayers, filterType, visibilityFilter]);
+
+  // Calculate stats based on filtered layers
+  const guidelineStats = calculateStats(filteredLayers);
+  const textStyleStats = calculateTextStyleStats(filteredLayers);
 
   // Add this effect to handle clicking outside filters
   React.useEffect(() => {
