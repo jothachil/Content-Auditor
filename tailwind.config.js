@@ -3,6 +3,7 @@ module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     fontSize: {
+      xsss: ["10px", { lineHeight: "16px" }],
       xss: ["12px", { lineHeight: "18px" }],
       xs: ["14px", { lineHeight: "24px" }],
       sm: ["16px", { lineHeight: "28px" }],

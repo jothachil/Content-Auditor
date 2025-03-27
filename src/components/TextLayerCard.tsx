@@ -14,13 +14,8 @@ interface TextLayerCardProps {
 }
 
 const TextLayerCard: React.FC<TextLayerCardProps> = ({ layer, onSelect }) => {
-  const allGuidelinesPassed = Object.values(layer.guidelineResults || {}).every(
-    (result) => result
-  );
-
   return (
-    <div className="shadow-button-base bg-white transition-all flex flex-col text-slate-900 rounded text-xs">
-      {/* Layer Header */}
+    <div className="shadow-button-base bg-white transition-all flex flex-col text-slate-900 rounded text-xs overflow-hidden">
       <div
         className="flex items-start justify-between border-b py-2 px-2.5 cursor-pointer"
         onClick={() => onSelect(layer.id)}
@@ -34,8 +29,10 @@ const TextLayerCard: React.FC<TextLayerCardProps> = ({ layer, onSelect }) => {
             )}
           </div>
           <div className="flex flex-col">
-            <span title={layer.characters}>{layer.characters}</span>
-            <span className="text-xss text-slate-500">
+            <span className="text-xss" title={layer.characters}>
+              {layer.characters}
+            </span>
+            <span className="text-xsss text-slate-500">
               {layer.fontName?.family} • {layer.fontSize}px
               {layer.textStyleName && <> • {layer.textStyleName}</>}
             </span>
@@ -74,16 +71,6 @@ const TextLayerCard: React.FC<TextLayerCardProps> = ({ layer, onSelect }) => {
       </div>
 
       {/* Summary Status */}
-      <div className="text-xss text-slate-500 py-2 px-2.5">
-        {allGuidelinesPassed ? (
-          "✨ All guidelines passed"
-        ) : (
-          <div className="flex items-center gap-2">
-            <TbAlertSquareRounded className="text-scarlet-600 w-4 h-4 my-1" />
-            <div>Needs attention</div>
-          </div>
-        )}
-      </div>
     </div>
   );
 };
