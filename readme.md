@@ -1,3 +1,5 @@
+![Content Auditor Cover](https://res.cloudinary.com/drch6exvq/image/upload/v1744178659/Plugin/content-audit.jpg)
+
 # Content Auditor
 
 A Figma plugin to audit and validate text layers in your designs based on UX writing and content guidelines.
@@ -179,9 +181,3 @@ Contributions are welcome! If you'd like to add new guidelines, improve the UI, 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Built with React and TypeScript
-- Styled with TailwindCSS
-- Created by John Thachil
