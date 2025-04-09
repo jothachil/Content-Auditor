@@ -16,12 +16,26 @@ A Figma plugin to audit and validate text layers in your designs based on UX wri
   - Text style usage
   - Visibility state (visible/hidden)
 
-## Installation
+### Setup
 
-1. Clone the repository
-2. Install the dependencies and run the development server.
-3. In Figma, right-click in workspace and click **Plugins** > **Development** > **Import from manifest**
-4. Select the manifest file from the repository
+```bash
+# Clone the repository
+git clone [repository-url]
+
+# Navigate to project directory
+cd content-auditor
+
+# Install dependencies
+pnpm install
+
+# Start development mode with hot reload
+pnpm dev
+```
+
+## Figma Plugin Installation
+
+1. In Figma, right-click in workspace and click **Plugins** > **Development** > **Import from manifest**
+2. Select the manifest file from the repository
 
 ## Adding Custom Guidelines
 
@@ -84,29 +98,6 @@ You can implement your validation using:
 
 - [Node.js](https://nodejs.org/) (v16.19.0 recommended)
 - [PNPM](https://pnpm.io/) (v7.28.0 recommended)
-
-### Setup
-
-```bash
-# Clone the repository
-git clone [repository-url]
-
-# Navigate to project directory
-cd content-auditor
-
-# Install dependencies
-pnpm install
-```
-
-### Development Commands
-
-```bash
-# Start development mode with hot reload
-pnpm dev
-
-# Build for production
-pnpm build
-```
 
 ## Contributing
 
