@@ -88,14 +88,6 @@ You can implement your validation using:
 - JavaScript string methods
 - Custom logic based on your requirements
 
-## Usage
-
-1. Select one or more frames, groups, or sections in your Figma document
-2. Run the Content Auditor plugin
-3. Review the list of text layers and their validation status
-4. Click on any text layer to select and zoom to it in your document
-5. Use the filter options to focus on specific issues
-
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) (v16.19.0 recommended)
