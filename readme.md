@@ -6,15 +6,12 @@ A Figma plugin to audit and validate text layers in your designs based on UX wri
 
 ## Features
 
-- **Text Layer Auditing**: Scan selected frames, groups, or sections to identify all text layers
-- **Content Guidelines**: Validate text against common UX writing standards:
-  - Sentence case formatting
-  - No trailing spaces
-  - No double spaces
-- **Visual Reporting**: Clear visual indicators for passing or failing text layers
-- **Text Style Analysis**: Identify text layers with or without proper text styles applied
-- **Layer Navigation**: Quick select and zoom to specific text layers for editing
-- **Filtering Options**: Filter text by:
+- 🔍 **Text Layer Auditing**: Scan selected frames, groups, or sections to identify all text layers
+- 📝 **Content Guidelines**: Validate text against common UX writing standards:
+- ✅ **Visual Reporting**: Clear visual indicators for passing or failing text layers
+- 🎨 **Text Style Analysis**: Identify text layers with or without proper text styles applied
+- 🎯 **Layer Navigation**: Quick select and zoom to specific text layers for editing
+- 🔎 **Filtering Options**: Filter text by:
   - Guidelines status (passing/failing)
   - Text style usage
   - Visibility state (visible/hidden)
@@ -74,42 +71,6 @@ You can implement your validation using:
 - Regular expressions (for pattern matching)
 - JavaScript string methods
 - Custom logic based on your requirements
-
-### 3. Common validation patterns
-
-Here are some example patterns for common content guidelines:
-
-```typescript
-// No more than 150 characters
-{
-  id: "max-length",
-  name: "Maximum Length",
-  description: "Text should not exceed 150 characters",
-  validate: (text: string) => text.length <= 150,
-}
-
-// Must contain specific keywords
-{
-  id: "required-keywords",
-  name: "Required Keywords",
-  description: "Must contain at least one of the required keywords",
-  validate: (text: string) => {
-    const keywords = ["important", "notice", "warning"];
-    return keywords.some(keyword => text.toLowerCase().includes(keyword));
-  },
-}
-
-// No jargon or technical terms
-{
-  id: "no-jargon",
-  name: "No Technical Jargon",
-  description: "Avoid technical terminology",
-  validate: (text: string) => {
-    const jargonTerms = ["frontend", "backend", "API", "SDK"];
-    return !jargonTerms.some(term => text.includes(term));
-  },
-}
-```
 
 ## Usage
 

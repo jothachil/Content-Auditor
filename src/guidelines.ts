@@ -1,5 +1,3 @@
-import nlp from "compromise";
-
 interface Guideline {
   id: string;
   name: string;
