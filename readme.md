@@ -19,6 +19,13 @@ A Figma plugin to audit and validate text layers in your designs based on UX wri
   - Text style usage
   - Visibility state (visible/hidden)
 
+## Installation
+
+1. Clone the repository
+2. Install the dependencies and run the development server.
+3. In Figma, right-click in workspace and click **Plugins** > **Development** > **Import from manifest**
+4. Select the manifest file from the repository
+
 ## Adding Custom Guidelines
 
 The Content Auditor is designed to be easily extensible with new content guidelines. If you need to add custom validation rules based on your organization's requirements, follow these steps:
@@ -104,22 +111,6 @@ Here are some example patterns for common content guidelines:
 }
 ```
 
-### 4. Rebuild the plugin
-
-After adding your new guidelines, rebuild the plugin:
-
-```bash
-pnpm build
-```
-
-Then reload the plugin in Figma to see your new guidelines in action.
-
-## Installation
-
-1. In Figma, click on **Plugins** in the menu
-2. Search for "Content Auditor"
-3. Click **Install**
-
 ## Usage
 
 1. Select one or more frames, groups, or sections in your Figma document
@@ -127,8 +118,6 @@ Then reload the plugin in Figma to see your new guidelines in action.
 3. Review the list of text layers and their validation status
 4. Click on any text layer to select and zoom to it in your document
 5. Use the filter options to focus on specific issues
-
-## Development
 
 ### Prerequisites
 
@@ -157,16 +146,6 @@ pnpm dev
 # Build for production
 pnpm build
 ```
-
-### Project Structure
-
-- `/src` - Source code
-  - `api.ts` - Plugin API implementation
-  - `code.ts` - Plugin entry point
-  - `ui.tsx` - UI implementation with React
-  - `guidelines.ts` - Content validation rules
-  - `/components` - React components
-- `/dist` - Build output
 
 ## Contributing
 
