@@ -16,7 +16,9 @@ A Figma plugin to audit and validate text layers in your designs based on UX wri
   - Text style usage
   - Visibility state (visible/hidden)
 
-### Setup
+## Installation
+
+### Project Setup
 
 ```bash
 # Clone the repository
@@ -32,7 +34,7 @@ pnpm install
 pnpm dev
 ```
 
-## Figma Plugin Installation
+### Install Figma Plugin
 
 1. In Figma, right-click in workspace and click **Plugins** > **Development** > **Import from manifest**
 2. Select the manifest file from the repository
