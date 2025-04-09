@@ -1,3 +1,5 @@
+import nlp from "compromise";
+
 interface Guideline {
   id: string;
   name: string;
@@ -6,61 +8,6 @@ interface Guideline {
 }
 
 export const guidelines: Guideline[] = [
-  {
-    id: "sentence-case",
-    name: "Sentence case",
-    description:
-      "First character capitalized or number or symbol, rest lowercase",
-    validate: (text: string) => {
-      if (!text) return true;
-
-      // Split the text into words
-      const words = text.split(/\s+/);
-
-      // Check if first word starts correctly (capital letter, number, or currency symbol)
-      const firstWord = words[0];
-      if (!/^[A-Z0-9₹$€£¥\u20B9]/.test(firstWord)) return false;
-
-      // Fail if all words are uppercase (except for single-word abbreviations)
-      if (words.length > 1 && words.every((word) => /^[A-Z]+$/.test(word))) {
-        return false;
-      }
-
-      // Check remaining words
-      for (let i = 1; i < words.length; i++) {
-        const word = words[i];
-        const prevWord = words[i - 1];
-
-        // Allow abbreviated words (all uppercase with optional numbers)
-        if (/^[A-Z0-9]+$/.test(word)) continue;
-
-        // Allow currency symbols and numbers
-        if (/^[₹$€£¥\u20B9]/.test(word) || /^[0-9]/.test(word)) continue;
-
-        // Allow hyphenated words
-        if (word.includes("-")) {
-          const parts = word.split("-");
-          // First part should be capitalized if it's the first word
-          if (i === 0) {
-            if (!/^[A-Z][a-z]*$/.test(parts[0])) return false;
-          } else {
-            // For other words, all parts should be lowercase
-            if (!parts.every((part) => /^[a-z]+$/.test(part))) return false;
-          }
-          continue;
-        }
-
-        // Regular words should be lowercase unless they come after a number
-        if (prevWord && /^[0-9]/.test(prevWord)) {
-          if (!/^[A-Z][a-z]*$/.test(word)) return false;
-        } else {
-          if (!/^[a-z]+$/.test(word)) return false;
-        }
-      }
-
-      return true;
-    },
-  },
   {
     id: "no-trailing-spaces",
     name: "No trailing spaces",
@@ -75,6 +22,56 @@ export const guidelines: Guideline[] = [
     description: "Text should not contain double spaces",
     validate: (text: string) => {
       return !/\s{2,}/.test(text);
+    },
+  },
+  {
+    id: "indian-currency-commas",
+    name: "Indian Currency Format",
+    description:
+      "Numbers representing currency should use the Indian comma separation format (e.g., 1,00,000, not 100,000) for values >= 1000.",
+    validate: (text: string) => {
+      // Regex to find potential numbers (integer or decimal, possibly with commas, optional Rupee symbol)
+      const numberRegex = /\b(?:₹\s*)?((\d{1,3}(?:,\d+)*|\d+)(?:\.\d+)?)\b/g;
+      // Regex for valid Indian comma format for the integer part (e.g., 1,000, 10,000, 1,00,000)
+      const indianCommaIntRegex =
+        /^(\d{1,3}(?:,\d{3})?$|^\d{1,2}(?:,\d{2})*,\d{3})$/;
+
+      let match;
+      while ((match = numberRegex.exec(text)) !== null) {
+        const fullNumberString = match[1]; // The full number string e.g., "1,00,000.50" or "500"
+
+        let intPart = fullNumberString;
+        const decimalPointIndex = fullNumberString.indexOf(".");
+        if (decimalPointIndex !== -1) {
+          intPart = fullNumberString.substring(0, decimalPointIndex);
+        }
+
+        // Remove potential currency symbol for parsing (though regex partly handles placement)
+        const cleanIntPart = intPart.startsWith("₹")
+          ? intPart.substring(1).trim()
+          : intPart;
+        // Check for empty string after removing symbol, skip if so
+        if (!cleanIntPart) continue;
+
+        const numberValue = parseFloat(cleanIntPart.replace(/,/g, ""));
+
+        if (isNaN(numberValue)) {
+          continue; // Skip if parsing failed
+        }
+
+        if (cleanIntPart.includes(",")) {
+          // If commas are present, it must match the Indian format
+          if (!indianCommaIntRegex.test(cleanIntPart)) {
+            return false; // Found an invalid number format
+          }
+        } else {
+          // If no commas are present, the number value must be less than 1000
+          if (numberValue >= 1000) {
+            return false; // Found a number >= 1000 missing commas
+          }
+        }
+      }
+      return true; // All found numbers were valid according to the rule
     },
   },
 ];

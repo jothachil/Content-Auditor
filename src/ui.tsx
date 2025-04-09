@@ -28,7 +28,7 @@ function App() {
   const [hasSelection, setHasSelection] = React.useState<boolean>(true);
   const [filterType, setFilterType] = React.useState<FilterType>("all");
   const [visibilityFilter, setVisibilityFilter] =
-    React.useState<VisibilityFilterType>("all");
+    React.useState<VisibilityFilterType>("visible");
 
   // Function to fetch text layers from the current selection
   const fetchTextLayers = React.useCallback(async () => {
